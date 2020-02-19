@@ -12,11 +12,12 @@ jobs:
       uses: actions/setup-go@v1
       with:
         go-version: ${{ matrix.go-version }}
+
     - name: Checkout code
       uses: actions/checkout@v2
+
     - name: Test
       run: go test ./...
+
     - name: Coveralls
-      uses: shogo82148/actions-goveralls@v1
-      with:
-        path-to-profile: profile.cov
+      run: $GOPATH/bin/goveralls -service=github
