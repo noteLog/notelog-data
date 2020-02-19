@@ -20,4 +20,6 @@ jobs:
       run: go test ./...
 
     - name: Coveralls
-      run: $GOPATH/bin/goveralls -service=github
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
