@@ -14,6 +14,7 @@ require (
 	github.com/google/go-github/v29 v29.0.3
 	github.com/joho/godotenv v1.3.0
 	github.com/kennygrant/sanitize v1.2.4 // indirect
+	github.com/mattn/goveralls v0.0.5 // indirect
 	github.com/robfig/cron v1.2.0
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
