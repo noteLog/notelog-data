@@ -7,6 +7,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// CreateUpdateBlogTable retrieves the list of my blog posts from https://tansawit.me/posts
+// And feed each post data into the main MySQL database
 func CreateUpdateBlogTable(dbConn string) {
 	db, sqlOpenErr := sql.Open("mysql", dbConn)
 	if sqlOpenErr != nil {
