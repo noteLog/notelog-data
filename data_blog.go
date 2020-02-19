@@ -9,11 +9,9 @@ import (
 	"github.com/gocolly/colly"
 )
 
-/*
-   GetBlogPosts scrapes my blog at https://tansawit.me for the list of published blog posts
-   It then vists each posts and retrieves the relevant information and returns it in the form of
-   a slice of Post structs
-*/
+// GetBlogPosts scrapes my blog at https://tansawit.me for the list of published blog posts
+// It then vists each posts and retrieves the relevant information and returns it in the form of
+// a slice of Post structs
 func GetBlogPosts() []Post {
 	var allPosts []Post
 	c := colly.NewCollector(
