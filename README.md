@@ -12,4 +12,4 @@ Using the Google's [GitHub API Go library](https://github.com/google/go-github),
 
 ### Blog
 
-Scrapes my website [`posts page`](https://tansawit.me/posts) for the list of posts. It then visits each of those posts, extracting the relevant information (title, description, categories, tags, url)
+Scrapes my website [posts page](https://tansawit.me/posts) for the list of posts. It then visits each of those posts, extracting the relevant information (title, description, categories, tags, url)
