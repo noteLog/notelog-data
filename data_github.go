@@ -11,10 +11,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Repository struct {
-	URL, Name, Description, Language string
-}
-
 func getGitHubClient() (*github.Client, context.Context) {
 	loadDotEnvErr := godotenv.Load()
 	if loadDotEnvErr != nil {
@@ -30,7 +26,9 @@ func getGitHubClient() (*github.Client, context.Context) {
 	return client, ctx
 }
 
-func GetUserRepos(client *github.Client, ctx context.Context) ([]*github.Repository, error) {
+// GetUserRepos returns a slice of the user's public GitHub Repositories
+// Implementation Credit: https://github.com/lox/alfred-github-jump/repos.go
+func GetUserRepos(ctx context.Context, client *github.Client) ([]*github.Repository, error) {
 	opt := &github.RepositoryListOptions{
 		ListOptions: github.ListOptions{PerPage: 45},
 		Sort:        "pushed",
@@ -54,7 +52,9 @@ func GetUserRepos(client *github.Client, ctx context.Context) ([]*github.Reposit
 	return repos, nil
 }
 
-func GetStarredRepos(client *github.Client, ctx context.Context) ([]*github.Repository, error) {
+// GetStarredRepos returns a slice of all the repositories the user starred
+// Implementation Credit: https://github.com/lox/alfred-github-jump/repos.go
+func GetStarredRepos(ctx context.Context, client *github.Client) ([]*github.Repository, error) {
 	opt := &github.ActivityListStarredOptions{
 		ListOptions: github.ListOptions{PerPage: 45},
 		Sort:        "pushed",
