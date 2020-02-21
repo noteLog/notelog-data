@@ -62,7 +62,7 @@ func GetBlogPosts() []Post {
 					tags = append(tags, strings.TrimSpace(s.Text()))
 				})
 
-				// Post Nody
+				// Post Body
 				var postContent string
 				s.Find(".post-content").Each(func(j int, t *goquery.Selection) {
 					postContent = postContent + " " + t.Find("p").Text()
@@ -74,6 +74,7 @@ func GetBlogPosts() []Post {
 		}
 	})
 
+	//Sort into chronological order
 	for i, j := 0, len(allPosts)-1; i < j; i, j = i+1, j-1 {
 		allPosts[i], allPosts[j] = allPosts[j], allPosts[i]
 	}
