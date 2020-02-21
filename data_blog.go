@@ -80,15 +80,16 @@ func GetBlogPosts() []Post {
 	}
 
 	c.Visit("http://tansawit.me/posts/")
+
 	return allPosts
 }
 
 // Post stores the relevant information for each blog post
 type Post struct {
-	Title      string
-	Date       string
-	Categories []string
-	Tags       []string
-	Content    string
-	URL        string
+	Title      string   `json:"title"`
+	Date       string   `json:"date"`
+	Categories []string `json:"categories"`
+	Tags       []string `json:"tags"`
+	Content    string   `json:"content"`
+	URL        string   `json:"url"`
 }
