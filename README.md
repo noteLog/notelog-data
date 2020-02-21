@@ -1,4 +1,4 @@
-# NoteLog Data Feed Service [![Build Status](https://travis-ci.org/NoteLog/notelog-data.svg?branch=master)](https://travis-ci.org/NoteLog/notelog-data)
+# NoteLog Data Feed Service ![Test Status](https://github.com/NoteLog/notelog-data/workflows/Test/badge.svg)
 
 A cron service that feeds data from various places into NoteLog's main database for later use.
 

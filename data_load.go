@@ -1,44 +1,51 @@
 package main
 
 import (
-	"database/sql"
+	"encoding/json"
 	"log"
+	"os"
 
+	"github.com/elastic/go-elasticsearch/v8"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 // CreateUpdateBlogTable retrieves the list of my blog posts from https://tansawit.me/posts
 // And feed each post data into the main MySQL database
-func CreateUpdateBlogTable(dbConn string) {
-	db, sqlOpenErr := sql.Open("mysql", dbConn)
-	if sqlOpenErr != nil {
-		log.Fatalf("sqlOpenErr = %v", sqlOpenErr)
+
+func getESClient() (*elasticsearch.Client, error) {
+	cfg := elasticsearch.Config{
+		// ...
+		Username: "elastic",
+		Password: os.Getenv("ELASTICSEARCH_PWD"),
 	}
-	defer db.Close()
+	es, err := elasticsearch.NewClient(cfg)
+	return es, err
+}
 
-	createStmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS posts(post_id INT NOT NULL AUTO_INCREMENT, title VARCHAR(100) NOT NULL UNIQUE, text TEXT, url VARCHAR(100),date DATETIME NOT NULL, PRIMARY KEY (post_id))")
-	createStmt.Exec()
+func getESInfo() (string, string) {
 
-	insertStmt, err := db.Prepare("INSERT IGNORE INTO `posts` SET `title`=?, `text`=?, `url`=?,`date`=?;")
+	log.SetFlags(0)
+
+	var r map[string]interface{}
+
+	//Get cluster info
+	es, err := getESClient()
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error creating the client: %s", err)
 	}
-
-	posts := GetBlogPosts()
-	var postInserted int64
-	for _, post := range posts {
-		res, err := insertStmt.Exec(&post.Title, &post.Content, &post.URL, &post.Date)
-		if err != nil {
-			log.Printf("err = %+v\n", err)
-
-		} else {
-			count, err := res.RowsAffected()
-			if err != nil {
-				log.Printf("err = %+v\n", err)
-			}
-			postInserted += count
-		}
-
+	res, err := es.Info()
+	if err != nil {
+		log.Fatalf("Error getting response: %s", err)
 	}
-	log.Printf("%v blog posts inserted.", postInserted)
+	defer res.Body.Close()
+
+	// Check response status
+	if res.IsError() {
+		log.Fatalf("Error: %s", res.String())
+	}
+	// Deserialize the response into a map.
+	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+		log.Fatalf("Error parsing the response body: %s", err)
+	}
+	return elasticsearch.Version, r["version"].(map[string]interface{})["number"].(string)
 }
