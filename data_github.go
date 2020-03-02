@@ -11,11 +11,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func getGitHubClient() (*github.Client, context.Context) {
-	loadDotEnvErr := godotenv.Load()
-	if loadDotEnvErr != nil {
-		log.Fatalf("Error loading .env file")
+func getGitHubClient() *github.Client {
+	if len(os.Getenv("GITHUB_ACCESS_TOKEN")) == 0 {
+		loadDotEnvErr := godotenv.Load()
+		if loadDotEnvErr != nil || len(os.Getenv("GITHUB_ACCESS_TOKEN")) == 0 {
+			log.Printf("Error loading environment variables")
+		}
 	}
+
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN")},
@@ -23,12 +26,15 @@ func getGitHubClient() (*github.Client, context.Context) {
 	tc := oauth2.NewClient(ctx, ts)
 
 	client := github.NewClient(tc)
-	return client, ctx
+	return client
 }
 
 // GetUserRepos returns a slice of the user's public GitHub Repositories
 // Implementation Credit: https://github.com/lox/alfred-github-jump/repos.go
-func GetUserRepos(ctx context.Context, client *github.Client) ([]*github.Repository, error) {
+func githubGetUserRepos() ([]*github.Repository, error) {
+	client := getGitHubClient()
+	ctx := context.Background()
+
 	opt := &github.RepositoryListOptions{
 		ListOptions: github.ListOptions{PerPage: 45},
 		Sort:        "pushed",
@@ -54,7 +60,10 @@ func GetUserRepos(ctx context.Context, client *github.Client) ([]*github.Reposit
 
 // GetStarredRepos returns a slice of all the repositories the user starred
 // Implementation Credit: https://github.com/lox/alfred-github-jump/repos.go
-func GetStarredRepos(ctx context.Context, client *github.Client) ([]*github.Repository, error) {
+func githubGetStarredRepos() ([]*github.Repository, error) {
+	client := getGitHubClient()
+	ctx := context.Background()
+
 	opt := &github.ActivityListStarredOptions{
 		ListOptions: github.ListOptions{PerPage: 45},
 		Sort:        "pushed",
