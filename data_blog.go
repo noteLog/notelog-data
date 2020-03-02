@@ -13,6 +13,7 @@ import (
 // It then vists each posts and retrieves the relevant information and returns it in the form of
 // a slice of Post structs
 func GetBlogPosts() []Post {
+
 	var allPosts []Post
 	c := colly.NewCollector(
 		// Allow colly to only scrape my domain
@@ -49,8 +50,14 @@ func GetBlogPosts() []Post {
 				// Post Title
 				postTitle := s.Find("h1").Text()
 
-				// Posting Date
+				// Post Date
 				postDate := s.Find(".post-meta .post-meta-other time").Text()
+
+				// Post Featured Image
+				postFeaturedImage, featuredImageExists := s.Find(".post-featured-image img").Attr("data-src")
+				if !featuredImageExists {
+					log.Printf("Featured image does not exist for post title: %v", postTitle)
+				}
 
 				// Category List
 				s.Find(".post-meta .post-meta-main span a").Each(func(i int, s *goquery.Selection) {
@@ -69,7 +76,7 @@ func GetBlogPosts() []Post {
 				})
 
 				// Add Post to list of all Posts
-				allPosts = append(allPosts, Post{Title: postTitle, Date: postDate, Categories: categories, Tags: tags, Content: postContent, URL: postURL})
+				allPosts = append(allPosts, Post{Title: postTitle, Date: postDate, FeaturedImage: postFeaturedImage, Categories: categories, Tags: tags, Content: postContent, URL: postURL})
 			})
 		}
 	})
@@ -86,10 +93,11 @@ func GetBlogPosts() []Post {
 
 // Post stores the relevant information for each blog post
 type Post struct {
-	Title      string   `json:"title"`
-	Date       string   `json:"date"`
-	Categories []string `json:"categories"`
-	Tags       []string `json:"tags"`
-	Content    string   `json:"content"`
-	URL        string   `json:"url"`
+	Title         string   `json:"title"`
+	Date          string   `json:"date"`
+	FeaturedImage string   `json:"featured_image"`
+	Categories    []string `json:"categories"`
+	Tags          []string `json:"tags"`
+	Content       string   `json:"content"`
+	URL           string   `json:"url"`
 }
