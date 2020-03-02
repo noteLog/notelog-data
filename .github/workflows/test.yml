@@ -18,6 +18,7 @@ jobs:
 
     - name: Calc coverage
       env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           ELASTICSEARCH_URL: ${{ secrets.ELASTICSEARCH_URL }}
           ELASTICSEARCH_PWD: ${{ secrets.ELASTICSEARCH_PWD }}
       run: |
