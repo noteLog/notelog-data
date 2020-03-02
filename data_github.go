@@ -12,10 +12,13 @@ import (
 )
 
 func getGitHubClient() *github.Client {
-	loadDotEnvErr := godotenv.Load()
-	if loadDotEnvErr != nil {
-		log.Fatalf("Error loading .env file")
+	if len(os.Getenv("GITHUB_ACCESS_TOKEN")) == 0 {
+		loadDotEnvErr := godotenv.Load()
+		if loadDotEnvErr != nil || len(os.Getenv("GITHUB_ACCESS_TOKEN")) == 0 {
+			log.Printf("Error loading environment variables")
+		}
 	}
+
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN")},
