@@ -3,25 +3,16 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/v29/github" // with go modules enabled (GO111MODULE=on or outside GOPATH)
-	"github.com/joho/godotenv"
 )
 
-func getGitHubClient() *github.Client {
-	if len(os.Getenv("GITHUB_ACCESS_TOKEN")) == 0 {
-		loadDotEnvErr := godotenv.Load()
-		if loadDotEnvErr != nil || len(os.Getenv("GITHUB_ACCESS_TOKEN")) == 0 {
-			log.Printf("Error loading environment variables")
-		}
-	}
-
+func getGitHubClient(ghToken string) *github.Client {
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN")},
+		&oauth2.Token{AccessToken: ghToken},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 
@@ -31,8 +22,8 @@ func getGitHubClient() *github.Client {
 
 // GetUserRepos returns a slice of the user's public GitHub Repositories
 // Implementation Credit: https://github.com/lox/alfred-github-jump/repos.go
-func githubGetUserRepos() ([]*github.Repository, error) {
-	client := getGitHubClient()
+func githubGetUserRepos(ghToken string) ([]*github.Repository, error) {
+	client := getGitHubClient(ghToken)
 	ctx := context.Background()
 
 	opt := &github.RepositoryListOptions{
@@ -60,8 +51,8 @@ func githubGetUserRepos() ([]*github.Repository, error) {
 
 // GetStarredRepos returns a slice of all the repositories the user starred
 // Implementation Credit: https://github.com/lox/alfred-github-jump/repos.go
-func githubGetStarredRepos() ([]*github.Repository, error) {
-	client := getGitHubClient()
+func githubGetStarredRepos(ghToken string) ([]*github.Repository, error) {
+	client := getGitHubClient(ghToken)
 	ctx := context.Background()
 
 	opt := &github.ActivityListStarredOptions{
