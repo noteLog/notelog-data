@@ -1,25 +1,17 @@
 package main
 
 import (
+	"os"
 	"testing"
 )
 
-func TestGetESClient(t *testing.T) {
-	_, err := getESClient()
+func TestESGetClient(t *testing.T) {
+	_, err := esGetClient(os.Getenv("ELASTICSEARCH_URL"), os.Getenv("ELASTICSEARCH_PWD"))
 	if err != nil {
 		t.Errorf("Getting ElasticSearch Client returned an error %v+", err)
 	}
 }
 
-func TestGetESInfo(t *testing.T) {
-	client, server := getESInfo()
-
-	expectedClient := "8.0.0-SNAPSHOT"
-	expectedServer := "7.6.0"
-	if client != expectedClient {
-		t.Errorf("Client version %v does not match expected %v", client, expectedClient)
-	}
-	if server != expectedServer {
-		t.Errorf("Client version %v does not match expected %v", server, expectedServer)
-	}
+func TestESIndexGitHub(t *testing.T) {
+	esIndexGitHub(os.Getenv("ELASTICSEARCH_URL"), os.Getenv("ELASTICSEARCH_PWD"), os.Getenv("GITHUB_ACCESS_TOKEN"))
 }
