@@ -58,6 +58,7 @@ func GetBlogPosts() []Post {
 				if !featuredImageExists {
 					log.Printf("Featured image does not exist for post title: %v", postTitle)
 				}
+				postFeaturedImage = "https://tansawit.me" + postFeaturedImage
 
 				// Category List
 				s.Find(".post-meta .post-meta-main span a").Each(func(i int, s *goquery.Selection) {

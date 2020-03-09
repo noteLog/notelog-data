@@ -1,7 +1,17 @@
-FROM golang:latest
-RUN mkdir $GOPATH/src/notelog-data
-WORKDIR $GOPATH/src/notelog-data
-COPY . .
+FROM golang:latest as builder
+
+WORKDIR /app
+
+COPY go.* ./
 RUN go mod download
-RUN go build .
+
+COPY . ./
+
+RUN CG0_ENABLED=0 GOOS=linux go build -mod=readonly -v
+
+FROM alpine:3
+RUN apk add --nocache ca-certificates
+
+COPY --from=builder /app/notelog-data /notelog-data
+
 CMD ["./notelog-data"]
