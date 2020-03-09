@@ -1,27 +1,17 @@
 package main
 
 import (
-	"flag"
-	"log"
+	"os"
+
+	"github.com/jasonlvhit/gocron"
 )
 
 func main() {
-	var esURL = flag.String("esurl", "", "URL of your Elasticsearch service")
-	var esPWD = flag.String("espwd", "", "Password for your Elasticsearch service")
-	flag.Parse()
+	esURL := os.Getenv("ES_URL")
+	esPWD := os.Getenv("ES_PWD")
+	ghToken := os.Getenv("GITHUB_ACCESS_TOKEN")
 
-	// gocron.Every(1).Hour().Do(githubCronPlaceholder)
-	// gocron.Every(1).Day().Do(blogCronPlaceholder)
-	// <-gocron.Start()
-
-	// esIndexGitHub(*esURL, *esPWD, *ghToken)
-	esIndexBlog(*esURL, *esPWD)
-}
-
-func githubCronPlaceholder() {
-	log.Printf("Fetching GitHub Repos")
-}
-
-func blogCronPlaceholder() {
-	log.Printf("Fetching Blog Posts")
+	gocron.Every(1).Hour().Do(esIndexGitHub, esURL, esPWD, ghToken)
+	gocron.Every(1).Day().Do(esIndexBlog, esURL, esPWD)
+	<-gocron.Start()
 }
