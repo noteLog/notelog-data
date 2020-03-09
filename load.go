@@ -30,6 +30,7 @@ func esGetClient(esURL, esPWD string) (*elasticsearch.Client, error) {
 }
 
 func esIndexGitHub(esURL, esPWD, ghToken string) {
+	log.Printf("%s Updating GitHub Indices %s", strings.Repeat("-", 10), strings.Repeat("-", 10))
 	es, err := esGetClient(esURL, esPWD)
 	if err != nil {
 		log.Printf("Error creating the client: %s", err)
@@ -48,7 +49,7 @@ func esIndexGitHub(esURL, esPWD, ghToken string) {
 	indexGitHub(es, "repo-personal", reposUser)
 	indexGitHub(es, "repo-starred", reposStarred)
 
-	log.Println(strings.Repeat("-", 37))
+	log.Printf("%s COMPLETED Updating GitHub Indices %s", strings.Repeat("-", 10), strings.Repeat("-", 10))
 }
 
 func indexGitHub(es *elasticsearch.Client, index string, repos []*github.Repository) {
@@ -112,6 +113,7 @@ func indexGitHub(es *elasticsearch.Client, index string, repos []*github.Reposit
 
 func esIndexBlog(esURL, esPWD string) {
 	var wg sync.WaitGroup
+	log.Printf("%s Updating Blog Index %s", strings.Repeat("-", 10), strings.Repeat("-", 10))
 	es, err := esGetClient(esURL, esPWD)
 	index := "blog"
 
@@ -172,6 +174,7 @@ func esIndexBlog(esURL, esPWD string) {
 		}(i, post)
 	}
 	wg.Wait()
+	log.Printf("%s COMPLETED Updating GitHub Indices %s", strings.Repeat("-", 10), strings.Repeat("-", 10))
 }
 
 func nilableString(s *string) string {
