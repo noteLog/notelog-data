@@ -54,7 +54,7 @@ func esIndexGitHub(esURL, esPWD, ghToken string) {
 func indexGitHub(es *elasticsearch.Client, index string, repos []*github.Repository) {
 	var wg sync.WaitGroup
 
-	log.Printf(`%s Indexing Starred Repositories to Index "%s" %s`, strings.Repeat("-", 10), strings.Repeat("-", 10), index)
+	log.Printf(`%s Indexing Starred Repositories to Index "%s" %s`, strings.Repeat("-", 10), index, strings.Repeat("-", 10))
 	for i, repo := range repos {
 		wg.Add(1)
 
@@ -68,12 +68,14 @@ func indexGitHub(es *elasticsearch.Client, index string, repos []*github.Reposit
 			var b strings.Builder
 			b.WriteString(`{"username" : "`)
 			b.WriteString(*repo.Owner.Login)
+			b.WriteString(`","avatar": "`)
+			b.WriteString(*repo.Owner.AvatarURL)
 			b.WriteString(`","reponame" : "`)
 			b.WriteString(*repo.Name)
 			b.WriteString(`","url" : "`)
 			b.WriteString(nilableString(repo.HTMLURL))
 			b.WriteString(`","description" : "`)
-			b.WriteString(nilableString(repo.HTMLURL))
+			b.WriteString(nilableString(repo.Description))
 			b.WriteString(`"}`)
 
 			// Set up the request object.
@@ -104,6 +106,70 @@ func indexGitHub(es *elasticsearch.Client, index string, repos []*github.Reposit
 				}
 			}
 		}(i, repo)
+	}
+	wg.Wait()
+}
+
+func esIndexBlog(esURL, esPWD string) {
+	var wg sync.WaitGroup
+	es, err := esGetClient(esURL, esPWD)
+	index := "blog"
+
+	if err != nil {
+		log.Printf("Error creating the client: %s", err)
+	}
+
+	posts := GetBlogPosts()
+	log.Printf(`%s Indexing Starred Repositories to Index "%s" %s`, strings.Repeat("-", 10), index, strings.Repeat("-", 10))
+	for i, post := range posts {
+		wg.Add(1)
+		if i > 0 && i%50 == 0 {
+			time.Sleep(500 * time.Millisecond)
+		}
+		go func(i int, post Post) {
+			defer wg.Done()
+
+			var b strings.Builder
+			b.WriteString(`{"title" : "`)
+			b.WriteString(post.Title)
+			b.WriteString(`","date" : "`)
+			b.WriteString(post.Date)
+			b.WriteString(`","image" : "`)
+			b.WriteString(post.FeaturedImage)
+			// b.WriteString(`","content" : "`)
+			// content := strings.Replace(post.Content, `"`, `'`, -1)
+			// b.WriteString(content)
+			b.WriteString(`","url" : "`)
+			b.WriteString(post.URL)
+			b.WriteString(`"}`)
+			// Set up the request object.
+			req := esapi.IndexRequest{
+				Index:      index,
+				DocumentID: strconv.Itoa(i + 1),
+				Body:       strings.NewReader(b.String()),
+				Refresh:    "true",
+			}
+
+			// Perform the request with the client.
+			res, err := req.Do(context.Background(), es)
+			if err != nil {
+				log.Fatalf("Error getting response: %s", err)
+			}
+			defer res.Body.Close()
+
+			if res.IsError() {
+				log.Printf("[%s] Error indexing document ID=%d item='%v'", res.Status(), i+1, b.String())
+			} else {
+				// Deserialize the response into a map.
+				var r map[string]interface{}
+				if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+					log.Printf("Error parsing the response body: %s", err)
+				} else {
+					// Print the response status and indexed document version.
+					log.Printf("[%s] %s; version=%d", res.Status(), r["result"], int(r["_version"].(float64)))
+				}
+			}
+		}(i, post)
 	}
 	wg.Wait()
 }
